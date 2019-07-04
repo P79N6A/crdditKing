@@ -1,0 +1,152 @@
+<template>
+    <ui-layout :brs="brs">
+        <ui-container style="height:50rem;overflow-y:scroll">
+            <el-row>
+                <el-form :inline="true" :model="queryMap" class="demo-form-inline" label-width="100px">
+                    <el-row>
+                        <el-col :span="3">
+                            <el-form-item label="">
+                                <el-input v-model="queryMap.keyword" placeholder="請輸入信用卡名稱" clearable></el-input>
+                            </el-form-item>
+                        </el-col>
+                        <el-col :span="5">
+                            <el-form-item label=" ">
+                                <el-button type="primary" @click="getTableData">
+                                    <i class="el-icon-search"></i>
+                                    <span>查詢</span>
+                                </el-button>
+                                <el-button type="primary" @click="cardInsert">
+                                    <i class="el-icon-circle-plus-outline"></i>
+                                    <span>新增</span>
+                                </el-button>
+                            </el-form-item>
+                        </el-col>
+                    </el-row>
+                </el-form>
+            </el-row>
+            <el-row>
+                <el-col>
+                    <el-table :data="tableData" border style="width: 80%">
+                        <el-table-column type="index" label="序號" align="center" ></el-table-column>
+                        <el-table-column prop="url" label="信用卡圖片"  align="center" width="180px;">
+                          <template slot-scope="scope">
+                              <img v-if="scope.row.url" :src="scope.row.url" style="width:150px;height:50px;">
+                          </template>
+                        </el-table-column>
+                        <el-table-column prop="name" label="信用卡名稱" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="bankName" label="銀行名稱" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="award" label="迎新優惠" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="unique" label="獨家申請優惠" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="discounts" label="信用卡精選優惠" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="charge" label="簽賬獎賞" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <el-table-column prop="other" label="重要字眼" align="center" :show-overflow-tooltip="true" width="150px;"></el-table-column>
+                        <!-- <el-table-column prop="annualSalary" label="年薪" align="center" ></el-table-column>
+                        <el-table-column prop="annualFee" label="年費" align="center" ></el-table-column>
+                        <el-table-column prop="overseasMileage" label="海外消費里數" align="center" width="100px;"></el-table-column>
+                        <el-table-column prop="localMileage" label="本地消費里數" align="center" width="100px;"></el-table-column>
+                        <el-table-column prop="mileage" label="迎新里數" align="center" ></el-table-column>
+                        <el-table-column prop="overseasMoney" label="海外消費現金回贈" align="center" width="150px;"></el-table-column>
+                        <el-table-column prop="localMoney" label="本地消費現金會贈" align="center" width="150px;"></el-table-column>
+                        <el-table-column prop="money" label="迎新消費/現金回贈" align="center" width="150px;"></el-table-column> -->
+                        <el-table-column label="操作" width="200px;" fixed="right" align="center">
+                            <template slot-scope="scope">
+                                <el-button type="text" size="small" @click="toDelete(scope.row)" v-text="scope.row.deleted == 'N' ? '刪除' : '已刪除'"></el-button>
+                                <el-button type="text" size="small" @click="toEdit(scope.row)" style="margin-left:10px;">編輯</el-button>
+                            </template>
+                        </el-table-column>
+                    </el-table>
+                </el-col>
+            </el-row>
+
+            <el-row>
+                <ui-page :total="total" :pageSize="10" @size-change="handleSizeChange" @current-change="handleCurrentChange"></ui-page>
+            </el-row>
+        </ui-container>
+    </ui-layout>
+</template>
+
+<script>
+import UiPage from "../../components/UiPage.vue";
+import { Loading } from "element-ui";
+import { exportExcel } from "../../../config/project/project.env";
+export default {
+  components: { UiPage, Loading },
+  data() {
+    return {
+      exportExcel:exportExcel,
+      brs: [{ name: "信用卡管理", to: { name: "cardManager" } }],
+      total: 100,
+      queryMap: {
+        pageNo: 1,
+        pageSize: 10,
+        keyword: "",
+      },
+      tableData: [],
+    };
+  },
+  mounted() {
+    this.getTableData();
+  },
+  computed: {
+    
+  },
+  methods: {
+    //跳转新增页
+    cardInsert() {
+      this.$to({ name: "cardInsert" });
+    },
+    //编辑
+    toEdit(row){
+        this.$to({ name: "cardDetail", query: {id:row.id} });
+    },
+    toDelete(row){
+      let visibtext = null;
+      let deleted = null;
+      if (row.deleted == "N") {
+        visibtext = "刪除";
+        deleted = "Y";
+      }
+      if (row.deleted == "Y") {
+        visibtext = "回復";
+        deleted = "N";
+      }
+      this.$confirm("是否確認對該信用卡進行" + visibtext + "操作", "提示", {
+        confirmButtonText: "確定",
+        cancelButtonText: "取消",
+        type: "warning"
+      }).then(() => {
+          this.$post("cardSave", { id: row.id, deleted: deleted }).then(res => {
+            this.getTableData();
+            this.$message({ message: "操作成功", 
+                            type: "success",
+                            center:true });
+          });
+    }).catch(() => {});
+    },
+    getTableData() {
+      let loadingInstance = Loading.service({ fullscreen: true });
+      this.$post("cardList", this.queryMap)
+        .then(res => {
+          this.tableData = res.list;
+          this.total = res.total;
+          loadingInstance.close();
+        })
+        .catch(() => {
+          loadingInstance.close();
+        });
+    },
+    handleSizeChange(val) {
+      this.queryMap.pageNo = val;
+      this.getTableData();
+    },
+    handleCurrentChange(val) {
+      this.queryMap.pageNo = val;
+      this.getTableData();
+    }
+  }
+};
+</script>
+
+<style>
+@import "../../style/teaend.less";
+</style>

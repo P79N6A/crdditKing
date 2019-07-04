@@ -1,0 +1,13 @@
+module.exports = {
+    devPort: 8085,
+    projectConfig: {
+        default: {
+            name: "ck",
+            rootPath: "ck",
+            baseURL: "ck",
+            proxyServer: "http://localhost:8090"
+        }
+    },
+    viewImg:"http://localhost:8090/ck/",
+    uploadImg:"http://localhost:8090"
+}

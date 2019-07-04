@@ -1,0 +1,12 @@
+module.exports = {
+    projectConfig: {
+        default: {
+            name: "ck",
+            rootPath: "ck",
+            baseURL: "http://47.97.163.4:6055",
+        }
+    },
+    viewImg:"http://47.97.163.4:6051/ck/",
+    exportExcel:"http://47.97.163.4:6055",
+    uploadImg:"http://47.97.163.4:6055"
+}

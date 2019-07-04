@@ -1,0 +1,587 @@
+<template>
+    <ui-layout :brs="brs">
+        <ui-container style="height:40rem;overflow-y:scroll">
+          <!-- style="height:700px;overflow-y:scroll" -->
+                <el-form :inline="true" :model="formData" ref="formData" class="demo-form-inline" label-position="center" label-width="130px">
+                    <el-col >
+                      <el-row :span="7">
+                            <el-form-item label="信用卡圖片" prop="url">
+                                <el-upload
+                                    class="avatar-uploader"
+                                    action="http://47.75.102.93:80/ck/file/upload"
+                                    :show-file-list="false"
+                                    :on-success="handleAvatarSuccess"
+                                    >
+                                    <img v-if="formData.url" :src="formData.url" class="avatar">
+                                    <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+                                    <!-- :before-upload="beforeAvatarUpload" -->
+                                    </el-upload>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="銀行名稱">
+                                <el-input v-model="formData.bankName" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="信用卡名稱">
+                                <el-input v-model="formData.name" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="外部鏈接">
+                                <el-input v-model="formData.webLink" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="所属银行">
+                                 <el-select filterable v-model="formData.bankId" placeholder="请选择" @change="goodsBankChange" size="18">
+                                    <el-option v-for="i in bankArr" :key="i.name" :label="i.name" :value="i.id"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="類型">
+                                 <!-- <el-select filterable v-model="formData.cardTypeId" placeholder="请选择" @change="goodsTypeChange" size="18">
+                                    <el-option v-for="i in cardTypeArr" :key="i.name" :label="i.name" :value="i.id"></el-option>
+                                </el-select> -->
+                                 <template>
+                                    <el-radio v-model="formData.cardTypeId" label="1">信用卡迎新優惠</el-radio>
+                                    <el-radio v-model="formData.cardTypeId" label="2">信用卡詳情</el-radio>
+                                </template>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="重要字眼">
+                                <el-input v-model="formData.other" style="width:500px;" type="textarea" :rows="4" placeholder="请输入内容"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="摘要">
+                                <el-input v-model="formData.digest" style="width:500px;" type="textarea" :rows="4" placeholder="请输入内容"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="迎新優惠">
+                                <el-input v-model="formData.award" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="迎新優惠詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.awardDigest" ref="myQuillEditor" class="editer" :options="awardOption" @ready="awardReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="獨家申請優惠" style="margin-top:50px;">
+                                <el-input v-model="formData.unique" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="獨家申請優惠詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.uniqueDigest" ref="myQuillEditor" class="editer" :options="uniqueOption" @ready="uniqueReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="精選優惠" style="margin-top:50px;">
+                                <el-input v-model="formData.discounts" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="精選優惠詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.discountsDigest" ref="myQuillEditor" class="editer" :options="detailOption" @ready="discountsReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="簽賬獎賞" style="margin-top:50px;">
+                                <el-input v-model="formData.charge" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="簽賬獎賞詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.chargeDigest" ref="myQuillEditor" class="editer" :options="chargeOption" @ready="chargeReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+
+                        <el-row :span="7">
+                            <el-form-item label="基本資料" style="margin-top:50px;">
+                                <el-input v-model="formData.detail" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="基本資料詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.detailDigest" ref="myQuillEditor" class="editer" :options="detailOption" @ready="detailReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+
+                        <el-row :span="7">
+                            <el-form-item label="費用" style="margin-top:50px;">
+                                <el-input v-model="formData.cost" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        
+                        <el-row :span="7">
+                            <el-form-item label="費用詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.costDigest" ref="myQuillEditor" class="editer" :options="costOption" @ready="costReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                        <!-- <el-row :span="7">
+                            <el-form-item label="名稱">
+                                <el-input v-model="formData.name" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="外部鏈接">
+                                <el-input v-model="formData.webLink" style="width:200px;"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="所属银行">
+                                 <el-select filterable v-model="formData.bankId" placeholder="请选择" @change="goodsBankChange" size="18">
+                                    <el-option v-for="i in bankArr" :key="i.name" :label="i.name" :value="i.id"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="信用卡類型">
+                                 <el-select filterable v-model="formData.cardTypeId" placeholder="请选择" @change="goodsTypeChange" size="18">
+                                    <el-option v-for="i in cardTypeArr" :key="i.name" :label="i.name" :value="i.id"></el-option>
+                                </el-select>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="年薪">
+                                <el-input v-model.number="formData.annualSalary" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="年費">
+                                <el-input v-model.number="formData.annualFee" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="海外消費里數">
+                                <el-input v-model.number="formData.overseasMileage" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="本地消費里數">
+                                <el-input v-model.number="formData.localMileage" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="迎新里數">
+                                <el-input v-model.number="formData.mileage" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="海外消費現金回贈">
+                                <el-input v-model.number="formData.overseasMoney" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="本地消費現金會增">
+                                <el-input v-model.number="formData.localMoney" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="迎新消費/現金回贈">
+                                <el-input v-model.number="formData.money" style="width:200px;" type="number"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="精選特惠">
+                                  <div style="width:700px;">
+                                      <el-checkbox-group v-model="discountsChoiceCheck" @change="handleCheckedChoice">
+                                        <el-checkbox :label="i.id" v-for="(i , k) in discountsChoiceArr" :key="k" style="width:100px;">{{i.name}}</el-checkbox>
+                                      </el-checkbox-group>
+                                  </div> 
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="優惠類別">
+                                  <div style="width:700px;">
+                                      <el-checkbox-group v-model="discountsTypeCheck" @change="handleCheckedType">
+                                        <el-checkbox :label="i.id" v-for="(i , k) in discountsTypeArr" :key="k" style="width:100px;">{{i.name}}</el-checkbox>
+                                      </el-checkbox-group>
+                                  </div> 
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="信用卡限時優惠">
+                                <el-input v-model="formData.flashSale" style="width:500px;" type="textarea" :rows="8" placeholder="请输入内容"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="其他">
+                                <el-input v-model="formData.other" style="width:500px;" type="textarea" :rows="8" placeholder="请输入内容"></el-input>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7">
+                            <el-form-item label="信用卡限時優惠">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.flashSale" ref="myQuillEditor" class="editer" :options="flashSaleOption" @ready="flashSaleReady($event)" style="height:250px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                        <el-row :span="7" style="margin-top:50px;">
+                            <el-form-item label="信用卡迎新獎賞">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.award" ref="myQuillEditor" class="editer" :options="awardOption" @ready="awardReady($event)" style="height:300px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                          <el-row :span="7" style="margin-top:50px;">
+                            <el-form-item label="信用卡優惠">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.discounts" ref="myQuillEditor" class="editer" :options="discountsOption" @ready="discountsReady($event)" style="height:300px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                          <el-row :span="7" style="margin-top:50px;">
+                            <el-form-item label="信用卡詳情">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.detail" ref="myQuillEditor" class="editer" :options="detailOption" @ready="detailReady($event)" style="height:300px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                          <el-row :span="7" style="margin-top:50px;">
+                            <el-form-item label="其他">
+                                <div class="edit_container" >
+                                    <quill-editor v-model="formData.other" ref="myQuillEditor" class="editer" :options="otherOption" @ready="otherReady($event)" style="height:300px;">
+                                    </quill-editor>
+                                </div>
+                            </el-form-item>
+                        </el-row> -->
+                        <el-row>        
+                            <el-form-item label=" ">
+                                <div style="margin-left:50px;margin-top:100px;">
+                                    <el-button type="primary" @click="toEdit">確認編輯</el-button>
+                                    <el-button type="primary" @click="$back()">關閉</el-button>
+                                </div>
+                            </el-form-item>
+                        </el-row>
+                    </el-col>
+                </el-form>
+           
+        </ui-container>
+    </ui-layout>
+</template>
+
+<script>
+import { Loading } from "element-ui";
+import { quillEditor } from "vue-quill-editor"; //调用编辑器
+import UE from '../../components/editor.vue';
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
+export default {
+  components: { Loading,UE },
+  data() {
+    return {
+      // editorOption:{},
+      // flashSaleOption: {},
+      // awardOption: {},
+      // discountsOption: {},
+      // detailOption: {},
+      a:'',
+      // otherOption: {},
+      awardOption:{},
+      uniqueOption:{},
+      discountsOption:{},
+      chargeOption:{},
+      detailOption:{},
+      costOption:{},
+      brs: [{ name: "編輯信用卡", to: { name: "cardDetail" } }],
+      formData: {
+        url:null,
+        bankName:null,
+        name:null,
+        webLink:null,
+        bankId: null,
+        cardTypeId:null,
+        other:null,
+        digest:null,
+        award:null,
+        awardDigest:null,
+        unique:null,
+        uniqueDigest:null,
+        discounts:null,
+        discountsDigest:null,
+        charge:null,
+        chargeDigest:null,
+        detail:null,
+        detailDigest:null,
+        cost:null,
+        costDigest:null
+        // annualSalary:null,
+        // annualFee:null,
+        // overseasMileage:null,
+        // localMileage:null,
+        // mileage:null,
+        // overseasMoney:null,
+        // localMoney:null,
+        // money:null,
+        // flashSale:null,
+        // award:null,
+        // discounts:null,
+        // detail:null,
+        // other:null,
+        // discountsTypeArr:[],
+        // discountsChoiceArr:[]
+      },
+      //信用卡类型
+      cardTypeArr:[],
+      //银行类型
+      bankArr:[],
+      rules: {},
+      queryMap: {
+        pageNo: 1,
+        pageSize: 10000,
+      },
+      //所有精选优惠
+      discountsChoiceArr:[],
+      //所有优惠类别
+      discountsTypeArr:[],
+      //选择的精选特惠
+      discountsChoiceCheck:[],
+      //选择的优惠类别
+      discountsTypeCheck:[],
+    };
+  },
+  components: {
+    //使用编辑器
+    quillEditor,
+    UE
+  },
+  computed: {
+    editor() {
+      return this.$refs.myQuillEditor.quill;
+    },
+    
+  },
+  mounted() {
+    this.a = document.body.clientHeight;
+      this.getBankList();
+    //   this.getCardTypeList();
+      this.getCardDetail();
+      // this.getDiscountsTypeList();
+      // this.getDiscountsChoiceList();
+  },
+  methods: {
+    //勾選精選特惠
+    // handleCheckedChoice(value) {
+    //    this.formData.discountsChoiceArr = this.discountsChoiceCheck;
+    // },
+    //勾選精選特惠
+    // handleCheckedType(value) {
+    //    this.formData.discountsTypeArr = this.discountsTypeCheck;
+    // },
+    //获取所有优惠类别
+    // getDiscountsTypeList(){
+    //   let loadingInstance = Loading.service({ fullscreen: true });
+    //   this.$post("discountsTypeList",this.queryMap)
+    //     .then(res => {
+    //       this.discountsTypeArr = res.list;
+    //       loadingInstance.close();
+    //     })
+    //     .catch(() => {
+    //       loadingInstance.close();
+    //     });
+    // },
+    //获取所有精选特惠
+    // getDiscountsChoiceList(){
+    //   let loadingInstance = Loading.service({ fullscreen: true });
+    //   this.$post("discountsChoiceList",this.queryMap)
+    //     .then(res => {
+    //       this.discountsChoiceArr = res.list;
+    //       loadingInstance.close();
+    //     })
+    //     .catch(() => {
+    //       loadingInstance.close();
+    //     });
+    // },
+    getCardDetail() {
+      let loadingInstance = Loading.service({ fullscreen: true });
+      this.$get("cardDetail", this.$route.query.id)
+        .then(res => {
+          this.formData = res;
+          this.discountsChoiceCheck = res.discountsChoiceArr;
+          this.discountsTypeCheck = res.discountsTypeArr;
+          loadingInstance.close();
+        })
+        .catch(() => {
+          loadingInstance.close();
+        });
+    },
+    //下拉选择信用卡类型
+    goodsTypeChange(val){
+      this.formData.cardTypeId = val;
+    },
+    //下拉选择银行
+    goodsBankChange(val) {
+      this.formData.bankId = val;
+    },  
+    //银行集合
+    getBankList(){
+         let loadingInstance = Loading.service({ fullscreen: true });
+         this.$post("bankList", this.queryMap)
+        .then(res => {
+            this.bankArr = res.list;
+            loadingInstance.close();
+        }).catch(() => {
+            loadingInstance.close();
+        });
+    },
+    //信用卡类型集合
+    getCardTypeList(){
+        let loadingInstance = Loading.service({ fullscreen: true });
+         this.$post("cardTypeList", this.queryMap)
+        .then(res => {
+            this.cardTypeArr = res.list;
+            loadingInstance.close();
+        }).catch(() => {
+            loadingInstance.close();
+        });
+    },
+     awardReady(editor){},
+     uniqueReady(editor){},
+     discountsReady(editor){},
+     chargeReady(editor){},
+     detailReady(editor){},
+     costReady(editor){},
+    // onEditorReady(editor) {
+    // },
+     //富文本 限時優惠
+    // flashSaleReady(editor) {
+    // },
+    //富文本 迎新獎賞
+    // awardReady(editor) {
+    // },
+    //富文本 信用卡優惠
+    // discountsReady(editor) {
+    // },
+    //富文本 信用卡詳情
+    // detailReady(editor) {
+    // },
+    //富文本 其他
+    // otherReady(editor) {
+    // },
+    handleAvatarSuccess(res, file) {
+      this.formData.url = URL.createObjectURL(file.raw);
+      this.formData.url = res.data;
+    },
+    toEdit() {
+      this.$refs["formData"].validate(valid => {
+        if (valid) {
+          let loadingInstance = Loading.service({ fullscreen: true });
+          this.$post("cardSave", this.formData)
+            .then(res => {
+              this.$message({
+                showClose: true,
+                message: "編輯信用卡成功",
+                type: "success",
+                center:true
+              });
+              this.$to({ name: "cardManager" });
+              loadingInstance.close();
+            })
+            .catch(() => {
+              loadingInstance.close();
+            });
+        } else {
+          return false;
+        }
+      });
+    }
+  }
+};
+</script>
+
+<style lang="less">
+@import "../../style/teaend.less";
+.imgcontainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  > div {
+    text-align: center;
+    > p {
+      margin-bottom: 20px;
+    }
+    > div {
+      border: 1px solid #999;
+      padding: 10px;
+      width: 300px;
+      height: 300px;
+      > img {
+        max-width: 280px;
+        max-height: 280px;
+      }
+    }
+  }
+}
+.margintop20 {
+  margin-top: 20px;
+}
+.tenzi {
+  content: "";
+  display: block;
+  border: 0;
+  background-color: #9b9b9b;
+  border-radius: 5px;
+  position: absolute;
+}
+.avatar-uploader .el-upload {
+  border: 1px dashed #d9d9d9;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+.avatar-uploader .el-upload:hover {
+  border-color: #409eff;
+}
+.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 300px;
+  height: 178px;
+  line-height: 178px;
+  text-align: center;
+}
+.avatar {
+  width: 300px;
+  height: 178px;
+  display: block;
+}
+.el-checkbox+.el-checkbox {
+    margin-left: 0px;
+}
+</style>

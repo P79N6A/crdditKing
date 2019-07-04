@@ -1,0 +1,163 @@
+<template>
+    <div class="main">
+        <div class="main-header">
+            <ui-header>
+                <!-- <div slot="left" class="teaLogo">
+                    <img src="../assets/img/teaGoodLogo.png" alt="">
+                </div> -->
+                <div slot="right" class="teaHeaderRight">
+                    <el-dropdown @command="handleCommand">
+                        <span class="el-dropdown-link">
+                            <span class="teaHeaderRightText">Hello {{userName}}</span>
+                            <img class="loginOutIcon" src="../assets/img/loginout.png" alt="">
+                        </span>
+                        <el-dropdown-menu slot="dropdown">
+                            <el-dropdown-item command="loginOut">退出登錄</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </el-dropdown>
+                </div>
+            </ui-header>
+        </div>
+        <div class="main-body">
+            <div class="main-side">
+                <ui-side>
+                   <el-submenu index="1">
+                        <template slot="title">
+                            <i class="el-icon-tickets"></i>
+                            <span>用戶管理</span>
+                        </template>
+                        <el-menu-item-group>
+                            <el-menu-item index="1-1" @click="$to({name:'memberManager'})">會員管理</el-menu-item>
+                            <el-menu-item  index="1-2" @click="$to({name:'collectManager'})">用戶收藏</el-menu-item>
+                            <el-menu-item  index="1-3" @click="$to({name:'exchangeRecordManager'})">兌換記錄</el-menu-item>
+                            <el-menu-item  index="1-4" @click="$to({name:'merchantManager'})">商戶管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="2">
+                        <template slot="title">
+                            <i class="el-icon-edit-outline"></i>
+                            <span>信用卡管理</span>
+                        </template>
+                        <el-menu-item-group>
+                          <el-menu-item  index="2-1" @click="$to({name:'cardManager'})">信用卡管理</el-menu-item>
+                          <el-menu-item  index="2-2" @click="$to({name:'emoneyManager'})">電子貨幣包</el-menu-item>    
+                          <!-- <el-menu-item  index="2-3" @click="$to({name:'cardTypeManager'})">信用卡類型管理</el-menu-item> -->
+                          <!-- <el-menu-item  index="2-3" @click="$to({name:'discountsChoiceManager'})">信用卡優惠管理</el-menu-item> -->
+                          <el-menu-item  index="2-3" @click="$to({name:'ecardManager'})">電子貨幣信用卡</el-menu-item>
+                          <el-menu-item  index="2-4" @click="$to({name:'cardDiscountsNewManager'})">信用卡迎新優惠</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="3">
+                        <template slot="title">
+                            <i class="el-icon-edit"></i>
+                            <span>銀行管理</span>
+                        </template>
+                        <el-menu-item-group>
+                          <el-menu-item  index="3-1" @click="$to({name:'bankManager'})">銀行管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                    <el-submenu index="4">
+                        <template slot="title">
+                            <i class="el-icon-setting"></i>
+                            <span>內容管理</span>
+                        </template>
+                        <el-menu-item-group>
+                          <el-menu-item  index="4-1" @click="$to({name:'bannerManager'})">輪播圖</el-menu-item>
+                          <el-menu-item  index="4-2" @click="$to({name:'introductionManager'})">引導頁</el-menu-item>
+                          <el-menu-item  index="4-3" @click="$to({name:'discountsTypeManager'})">精選特惠</el-menu-item>
+                          <el-menu-item  index="4-4" @click="$to({name:'goodsManager'})">禮物管理</el-menu-item>
+                          <el-menu-item  index="4-5" @click="$to({name:'messageManager'})">系統消息</el-menu-item>
+                          <el-menu-item  index="4-6" @click="$to({name:'reportManager'})">報告管理</el-menu-item>
+                        </el-menu-item-group>
+                    </el-submenu>
+                </ui-side>
+            </div>
+            <div class="main-container">
+                <router-view></router-view>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+import UiHeader from "./../components/UiHeader";
+import UiSide from "./../components/UiSide";
+import { Loading } from "element-ui";
+export default {
+  components: { UiHeader, UiSide, Loading },
+  data() {
+    return {
+      userName: null,
+      arrs: []
+    };
+  },
+  mounted() {
+    this.userName = sessionStorage.getItem("name");
+  },
+  methods: {
+    handleCommand(command) {
+      if (command == "loginOut") {
+        let loadingInstance = Loading.service({ fullscreen: true });
+        this.$post("userLogout")
+          .then(res => {
+            loadingInstance.close();
+            this.$router.replace({ name: "login" });
+          })
+          .catch(() => {
+            loadingInstance.close();
+            this.$router.replace({ name: "login" });
+          });
+      }
+    }
+  },
+  computed: {
+   
+  }
+};
+</script>
+
+<style lang="less">
+@import "../style/variables.less";
+.teaLogo {
+  color: #fff;
+  font-size: 24px;
+  > img {
+    height: 40px;
+  }
+}
+.teaHeaderRight {
+  .teaHeaderRightText {
+    color: #fff;
+  }
+  .loginOutIcon {
+    vertical-align: middle;
+    margin-left: 20px;
+  }
+}
+.main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  .main-body {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    .main-side {
+      flex-shrink: 0;
+    }
+    .main-container {
+      flex: 1;
+      width: 100%;
+    }
+  }
+  .el-submenu .el-menu-item {
+    height: 40px;
+    line-height: 40px;
+  }
+}
+.el-icon-165 {
+  &::before {
+    content: "\00A5";
+  }
+}
+</style>

@@ -1,0 +1,10 @@
+module.exports = {
+    projectConfig: {
+        default: {
+            name: "ck",
+            rootPath: "ck",
+            baseURL: "http://101.132.125.248:6086",
+        }
+    },
+    viewImg:"http://101.132.125.248:6086/ck/",
+}
